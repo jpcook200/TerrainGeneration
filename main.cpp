@@ -75,19 +75,20 @@ float perlinOctaves(float x, int octaves, float peristance, float scale)
     return value;
 }
 
+
 int main()
 {
     // ---------------------------------------------- Initialise ----------------------------------------------------------------
     sf::RenderWindow window(sf::VideoMode({1920, 1080 }), "SFML window");
-    sf::Vector2 worldSize(16000, 16000);
-    sf::Vector2 gridSize(16, 16);
+    sf::Vector2i worldSize(1600, 1600);
+    sf::Vector2i gridSize(16, 16);
     
     float amplitude = 100.f;
-    float baseHeight = 500.f;
+    float baseHeight = 800.f;
     
-    float scale = 0.01;
+    float scale = 0.04;
     int octaves = 3;
-    float persitance = 0.5f;
+    float persitance = 0.15f;
 
     // Start the game loop -------------------------------------
     while (window.isOpen())
@@ -102,17 +103,33 @@ int main()
 
         sf::VertexArray perlinLine(sf::PrimitiveType::LineStrip, worldSize.x);
 
-        for (size_t i = 0; i <= worldSize.x; i++)
-        {
-            float noise = perlinOctaves(i, 5, 0.5f, scale);
-            float height = baseHeight + noise * amplitude;
-            perlinLine[i].position = sf::Vector2f(i, height);
-        }
+        ////generate heights for each x in grid 
+        //for (int x = 0; x <= worldSize.x; x++)
+        //{
+        //    float noise = perlinOctaves(x, octaves, persitance, scale);
+        //    float height = baseHeight + noise * amplitude;
+        //    std::cout << noise << std::endl;
+        //    perlinLine[x].position = sf::Vector2f(x, height);
+        //}
 
+        sf::RectangleShape dirtBlock(sf::Vector2f(gridSize.x, gridSize.y));
+        dirtBlock.setFillColor(sf::Color(129, 100, 100));
 
         // ----------------- Render -------------------------------------
-        window.clear();
+        window.clear(sf::Color(50, 150, 250));
         window.draw(perlinLine);
+        for (int x = 0; x < worldSize.x; x++)
+        {
+            float noise = perlinOctaves(x, octaves, persitance, scale);
+
+            int height = floor(noise * gridSize.y) + floor(baseHeight / gridSize.x );
+            
+            for (int y = 0; y < height; y++)
+            {
+                dirtBlock.setPosition(sf::Vector2f(x * gridSize.x, worldSize.y - (y * gridSize.y)));
+                window.draw(dirtBlock);
+            }
+        }
         window.display();
     }
 }
