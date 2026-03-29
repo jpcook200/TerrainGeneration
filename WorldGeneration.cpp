@@ -1,4 +1,5 @@
 #include <SFML/Graphics.hpp>
+#include <iostream>
 
 class WorldGeneration 
 {
@@ -16,6 +17,21 @@ class WorldGeneration
     //blocks
     sf::RectangleShape dirtBlock;
     sf::RectangleShape stoneBlock;
+
+    //load the texture image
+
+    sf::Texture tilesTexture;
+    sf::Sprite block{tilesTexture};
+    sf::Sprite block2{tilesTexture};
+    
+    void loadTexture()
+    {
+        if (!tilesTexture.loadFromFile("./assets/textures.png"))
+        {
+            std::cerr << "Couldn't load texture" << std::endl;
+            exit(-1);
+        }
+    }
 
     // helper functions
     // creates smoothness between interpolations - taken from perlin's cubic formula
@@ -102,6 +118,8 @@ public:
             dirtBlock(sf::Vector2f(gridSize.x, gridSize.y)),
             stoneBlock(sf::Vector2f(gridSize.x, gridSize.y))
     {
+
+        loadTexture();
     };
 
     void generateWorld()
@@ -116,25 +134,38 @@ public:
 
             for (int y = height2; y <= height; y++)
             {
-                dirtBlock.setPosition(sf::Vector2f(x * m_gridSize.x, m_worldSize.y - (y * m_gridSize.y)));
+                block.setPosition(sf::Vector2f(x * m_gridSize.x, m_worldSize.y - (y * m_gridSize.y)));
+                int tileX = 0;
+                int tileY = 0;
                 if (y == height)
                 {
-                    dirtBlock.setFillColor(sf::Color(200, 250, 180));
+                    tileX = 1;
+                    tileY = 6;
                 }
                 else
                 {
-                    dirtBlock.setFillColor(sf::Color(246, 150, 100));
+                    tileX = 1;
+                    tileY = 6;
                 }
-
-                m_window.draw(dirtBlock);
+                sf::IntRect rect({ tileX * 16, tileY * 16 }, { 16, 16 });
+                block.setTextureRect(rect);
+                m_window.draw(block);
             }
 
             for (int y = 0; y <= height2; y++)
             {
-                stoneBlock.setPosition(sf::Vector2f(x * m_gridSize.x, m_worldSize.y - (y *m_gridSize.y)));
-                stoneBlock.setFillColor(sf::Color(170, 150, 150));
-                m_window.draw(stoneBlock);
+                block2.setPosition(sf::Vector2f(x * m_gridSize.x, m_worldSize.y - (y * m_gridSize.y)));
+                int tileX = 3;
+                int tileY = 2;
+                sf::IntRect rect({ tileX * 16, tileY * 16 }, { 16, 16 });
+                block2.setTextureRect(rect);
+                m_window.draw(block2);
             }
         }
+    }
+
+    void renderWorld()
+    {
+
     }
 };

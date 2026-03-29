@@ -3,5 +3,5 @@
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
-  <Project Path="TerrainGeneration.vcxproj" />
+  <Project Path="TerrainGeneration.vcxproj" Id="69faadf4-4686-455d-9c7e-cb14f646d90e" />
 </Solution>
