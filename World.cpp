@@ -9,6 +9,10 @@ World::World(sf::Vector2i worldSize, int gridSize)
 
 void World::init()
 {
+    // clamp world size inputs to mulitples of grid
+    m_worldSize.x = m_worldSize.x - (m_worldSize.x % m_gridSize);
+    m_worldSize.y = m_worldSize.y - (m_worldSize.y % m_gridSize);
+
     // load the texture into the texture member variable
     if (!m_tilesTexture.loadFromFile("./assets/textures.png"))
     {
@@ -108,25 +112,28 @@ void World::generate()
 
         for (int y = 0; y < height; y++)
         {
-            m_terrainData[x][y] = Blocks::Sand;
+            m_terrainData[y][x] = Blocks::Sand;
         }
     }
 }
 
 void World::render(sf::RenderWindow& window)
 {
-    for (int x = 0; x < m_terrainData.size(); x++)
+    for (int y = 0; y < m_terrainData.size(); y++)
     {
-        for (int y = 0; y < m_terrainData[x].size(); y++)
+        for (int x = 0; x < m_terrainData[y].size(); x++)
         {
-            Blocks block = m_terrainData[x][y];
+            Blocks block = m_terrainData[y][x];
             
+            // skip air blocks
             if (block == Blocks::Air)
             {
                 continue;
             }
+
             // get texture coords
             sf::IntRect texRect = m_blockTextureMap.at(block);
+            
             //set texture and position on the texture
             m_block.setTextureRect(texRect);
             m_block.setPosition({

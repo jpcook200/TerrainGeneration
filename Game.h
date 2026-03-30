@@ -5,7 +5,7 @@
 class Game
 {
 	sf::RenderWindow m_window;
-	World m_world{ sf::Vector2i(1600, 1600), 16};
+	World m_world{ sf::Vector2i(1630, 1600), 16};
 
 public:
 	Game();
