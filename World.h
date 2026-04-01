@@ -7,6 +7,16 @@
 
 #include "Blocks.h"
 
+struct TerrainLayer 
+{
+	Blocks block;
+	int baseHeight;
+	float amplitude;
+	float scale;
+	float persistence;
+	int octaves;
+};
+
 class World
 {
 	// world settings
@@ -14,18 +24,13 @@ class World
 	int m_gridSize;
 	std::vector<std::vector<Blocks>> m_terrainData;
 	std::map<Blocks, sf::IntRect> m_blockTextureMap;
-
+	std::vector<TerrainLayer> m_terrainLayers;
+	
+	int m_terrainBaseHeight;
+	
 	// tiles variables
 	sf::Texture		m_tilesTexture;
 	sf::Sprite		m_block{ m_tilesTexture };
-
-	//perlin vairables
-	float	amplitude		= 2.f;
-	float	baseHeight		= 800.f;
-
-	float	scale			= 0.05;
-	int		octaves			= 3;
-	float	persitence		= 0.11f;
 
 	void init();
 	
@@ -42,12 +47,14 @@ class World
 	float perlinOctaves(float x, int octaves, float peristance, float scale);
 
 	void initBlockMap();
+	void initTerrainLayers();
 
 public:
 	
 	World(sf::Vector2i worldSize, int gridSize);	// constructor world size as vector2i and grid size as int
 	void generate();
 	void render(sf::RenderWindow& window);
-
+	sf::Vector2i getWorldSize();
+	int getGridSize();
 };
 

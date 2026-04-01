@@ -5,7 +5,10 @@
 class Game
 {
 	sf::RenderWindow m_window;
-	World m_world{ sf::Vector2i(1630, 1600), 16};
+	sf::View m_view;
+
+	// create world instance takes world size as number of blocks
+	World m_world{ sf::Vector2i(500, 300), 16};
 
 public:
 	Game();
@@ -14,5 +17,6 @@ public:
 	void processInput();
 	void update();
 	void render();
+	void clampView();
 };
 

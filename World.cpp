@@ -9,9 +9,7 @@ World::World(sf::Vector2i worldSize, int gridSize)
 
 void World::init()
 {
-    // clamp world size inputs to mulitples of grid
-    m_worldSize.x = m_worldSize.x - (m_worldSize.x % m_gridSize);
-    m_worldSize.y = m_worldSize.y - (m_worldSize.y % m_gridSize);
+    
 
     // load the texture into the texture member variable
     if (!m_tilesTexture.loadFromFile("./assets/textures.png"))
@@ -21,6 +19,7 @@ void World::init()
     }
 
     initBlockMap();
+    initTerrainLayers();
 }
 
 float World::fade(float t)
@@ -65,13 +64,13 @@ float World::perlin(float x)
     //fade
     float f = fade(point);
 
-    return (lerp(dotLeft, dotRight, f));
+    return lerp(dotLeft, dotRight, f);
 }
 
 float World::perlinOctaves(float x, int octaves, float peristence, float scale)
 {
-    float value = 0;
     float amplitude = 1.f;
+    float value = 0;
     float freq = scale;
     float maxVal = 0;
 
@@ -93,6 +92,15 @@ float World::perlinOctaves(float x, int octaves, float peristence, float scale)
 void World::initBlockMap()
 {
     m_blockTextureMap[Blocks::Sand] = sf::IntRect({ 1 * m_gridSize, 6 * m_gridSize }, { m_gridSize, m_gridSize });
+    m_blockTextureMap[Blocks::Stone] = sf::IntRect({ 0 * m_gridSize, 5 * m_gridSize }, { m_gridSize, m_gridSize });
+}
+
+void World::initTerrainLayers()
+{
+    m_terrainBaseHeight = m_worldSize.y * 0.75;
+
+    m_terrainLayers.push_back({Blocks::Sand, m_terrainBaseHeight, 60, 0.02, 0.5f, 3});
+    m_terrainLayers.push_back({Blocks::Stone, static_cast<int>(m_terrainBaseHeight * 0.5), 60, 0.05, 1.f, 5});
 }
 
 void World::generate()
@@ -107,12 +115,33 @@ void World::generate()
     // add sand blocks at perlin noise heights
     for (int x = 0; x < m_worldSize.x; x++)
     {
-        float noise = perlinOctaves(x, octaves, persitence, scale);
-        int height = floor(noise * m_gridSize * amplitude) + floor(baseHeight / m_gridSize);
+        std::vector<int> heights;
+        heights.reserve(m_terrainLayers.size());
 
-        for (int y = 0; y < height; y++)
+        // for each defined terrain layer generate noise values 
+        for (auto& layer : m_terrainLayers)
         {
-            m_terrainData[y][x] = Blocks::Sand;
+            float noise = perlinOctaves(x, layer.octaves, layer.persistence, layer.scale);
+            int height = layer.baseHeight + noise * layer.amplitude;
+            std::cout << height << std::endl;
+            heights.push_back(height);
+        }
+
+        // check heiaghts and set blocks under each height
+        for (int y = 0; y < m_worldSize.y; y++)
+        {
+            if (y > heights[0])
+            {
+                m_terrainData[y][x] = Blocks::Air;
+            }
+            else if (y > heights[1])
+            {
+                m_terrainData[y][x] = Blocks::Sand;
+            }
+            else 
+            {
+                m_terrainData[y][x] = Blocks::Stone;
+            }
         }
     }
 }
@@ -136,9 +165,11 @@ void World::render(sf::RenderWindow& window)
             
             //set texture and position on the texture
             m_block.setTextureRect(texRect);
+            
+            float worldPixelHeight = m_worldSize.y * m_gridSize;
             m_block.setPosition({
                 static_cast<float>(x * m_gridSize),
-                static_cast<float>(m_worldSize.y - (y * m_gridSize))
+                worldPixelHeight - ((y + 1) * m_gridSize)
             });
 
             // draw to window
@@ -147,3 +178,14 @@ void World::render(sf::RenderWindow& window)
         }
     }
 }
+
+sf::Vector2i World::getWorldSize()
+{
+    return m_worldSize;
+}
+
+int World::getGridSize()
+{
+    return m_gridSize;
+}
+
